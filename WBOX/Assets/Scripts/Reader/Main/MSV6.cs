@@ -119,4 +119,66 @@ public class MSV6
     {
         return MetaHeaderLength;
     }
+
+    public MSV6()
+    {
+        mMetaStreamVersion = "6VSM";
+        mDefaultSectionChunkSize = 0;
+        mDebugSectionChunkSize = 0;
+        mAsyncSectionChunkSize = 0;
+        mClassNamesLength = 6;
+        mClassNames = new ClassNames[6]
+        {
+            new ClassNames()
+            {
+                mTypeNameCRC = new Symbol()
+                {
+                    mCrc64 = 3668869983352010985,
+                },
+                mVersionCRC = 1926488950
+            },
+            new ClassNames()
+            {
+                mTypeNameCRC = new Symbol()
+                {
+                    mCrc64 = 15304637212026268460,
+                },
+                mVersionCRC = 2803846277
+            },
+            new ClassNames()
+            {
+                mTypeNameCRC = new Symbol()
+                {
+                    mCrc64 = 17598240634550078490,
+                },
+                mVersionCRC = 2762767791
+            },
+            new ClassNames()
+            {
+                mTypeNameCRC = new Symbol()
+                {
+                    mCrc64 = 9522928179385669185,
+                },
+                mVersionCRC = 86496959
+            },
+            new ClassNames()
+            {
+                mTypeNameCRC = new Symbol()
+                {
+                    mCrc64 = 13678157164603986352,
+                },
+                mVersionCRC = 2157035583
+            },
+            new ClassNames()
+            {
+                mTypeNameCRC = new Symbol()
+                {
+                    mCrc64 = 11596916798823387601,
+                },
+                mVersionCRC = 1432217323
+            }
+        };
+
+        MetaHeaderLength = (4 * 5) + (12 * mClassNamesLength);
+    }
 }

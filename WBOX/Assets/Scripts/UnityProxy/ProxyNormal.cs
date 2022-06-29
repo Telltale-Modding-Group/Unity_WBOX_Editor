@@ -15,4 +15,9 @@ public class ProxyNormal : MonoBehaviour
             z = mNormal.z
         };
     }
+
+    public int GetNormalIndex()
+    {
+        return transform.GetSiblingIndex();
+    }
 }

@@ -77,6 +77,55 @@ public class Walkboxes
         }
     }
 
+    public void CalculateNewVertexOffsets(uint metaHeaderTotalLength)
+    {
+        long position = 0;
+
+        position += metaHeaderTotalLength;
+
+        position += 4; //mName Block Size [4 bytes] //mName block size (size + string len)
+        position += 4; //mName Length [4 bytes]
+        position += (uint)mName.Length; //mName [x bytes]
+
+        //---------------------------mTris--------------------------
+        position += 4; //mTris DCArray Capacity [4 bytes]
+        position += 4; //mTris DCArray Size [4 bytes]
+
+        for (int i = 0; i < mTris.Length; i++)
+        {
+            position += mTris[i].GetByteSize();
+        }
+
+        //---------------------------mVerts--------------------------
+        position += 4; //mVerts DCArray Capacity [4 bytes]
+        position += 4; //mVerts DCArray Size [4 bytes]
+
+        long[] newVertexOffsets = new long[mVerts.Length];
+
+        for (int i = 0; i < mVerts.Length; i++)
+        {
+            newVertexOffsets[i] = position;
+
+            position += mVerts[i].GetByteSize();
+        }
+
+        //------------------------------------------------------------
+        //modify mTris
+
+        for (int i = 0; i < mTris.Length; i++)
+        {
+            Tri currentTri = mTris[i];
+
+            int vertexIndex1 = currentTri.mVerts[0];
+            int vertexIndex2 = currentTri.mVerts[1];
+            int vertexIndex3 = currentTri.mVerts[2];
+
+            currentTri.mVertOffsets[0] = (int)newVertexOffsets[vertexIndex1];
+            currentTri.mVertOffsets[1] = (int)newVertexOffsets[vertexIndex2];
+            currentTri.mVertOffsets[2] = (int)newVertexOffsets[vertexIndex3];
+        }
+    }
+
     /// <summary>
     /// Converts the data of this object into a byte array.
     /// </summary>

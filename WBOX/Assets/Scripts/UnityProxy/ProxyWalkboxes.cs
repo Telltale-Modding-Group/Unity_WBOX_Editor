@@ -38,15 +38,21 @@ public class ProxyWalkboxes : MonoBehaviour
             {
                 msv6.mDefaultSectionChunkSize = (uint)newWalkboxes.GetByteSize();
                 msv6.GetByteData(writer);
+
+                newWalkboxes.CalculateNewVertexOffsets(msv6.Get_MetaHeaderLength());
             }
             else if (msv5 != null)
             {
                 msv5.mDefaultSectionChunkSize = (uint)newWalkboxes.GetByteSize();
                 msv5.GetByteData(writer);
+
+                newWalkboxes.CalculateNewVertexOffsets(msv5.Get_MetaHeaderLength());
             }
             else if (mtre != null)
             {
                 mtre.GetByteData(writer);
+
+                newWalkboxes.CalculateNewVertexOffsets(mtre.Get_MetaHeaderLength());
             }
 
             newWalkboxes.WriteBinaryData(writer);

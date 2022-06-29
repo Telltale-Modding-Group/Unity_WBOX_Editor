@@ -6,7 +6,8 @@ public class ProxyTri : MonoBehaviour
 {
     public EnumMaterial mFootstepMaterial;
     public uint mFlags;
-    public int mNormal;
+    //public int mNormal;
+    public ProxyNormal mNormal;
     public int mQuadBuddy; //references a quad by index
     public float mMaxRadius;
 
@@ -28,7 +29,8 @@ public class ProxyTri : MonoBehaviour
             mFlags = mFlags
         };
 
-        newTri.mNormal = mNormal;
+        //newTri.mNormal = mNormal;
+        newTri.mNormal = mNormal.GetNormalIndex();
         newTri.mQuadBuddy = mQuadBuddy;
         newTri.mMaxRadius = mMaxRadius;
 

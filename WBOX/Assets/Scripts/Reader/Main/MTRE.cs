@@ -101,4 +101,55 @@ public class MTRE
     {
         return MetaHeaderLength;
     }
+
+    public MTRE GetNewHeader()
+    {
+        mMetaStreamVersion = "ERTM";
+        mClassNamesLength = 5;
+        mClassNames = new ClassNames[5]
+        {
+            new ClassNames()
+            {
+                mTypeNameCRC = new Symbol()
+                {
+                    mCrc64 = 3668869983352010985,
+                },
+                mVersionCRC = 990917534
+            },
+            new ClassNames()
+            {
+                mTypeNameCRC = new Symbol()
+                {
+                    mCrc64 = 15304637212026268460,
+                },
+                mVersionCRC = 1244432292
+            },
+            new ClassNames()
+            {
+                mTypeNameCRC = new Symbol()
+                {
+                    mCrc64 = 9522928179385669185,
+                },
+                mVersionCRC = 491445159
+            },
+            new ClassNames()
+            {
+                mTypeNameCRC = new Symbol()
+                {
+                    mCrc64 = 13678157164603986352,
+                },
+                mVersionCRC = 4079736747
+            },
+            new ClassNames()
+            {
+                mTypeNameCRC = new Symbol()
+                {
+                    mCrc64 = 11596916798823387601,
+                },
+                mVersionCRC = 1441281540
+            }
+        };
+
+        return this;
+    }
 }
