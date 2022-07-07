@@ -1,6 +1,7 @@
 ﻿#if UNITY_EDITOR
 
 using System.IO;
+using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace UnityTelltaleTools
         //GUI related
         private int tabIndex;
         private static int guiSectionSpacePixels = 10;
-        private static string[] tabNames = new string[] { "Import", "Generate" };
+        private static string[] tabNames = new string[] { "Import", "Generate", "OBJ" };
 
         private WalkBoxes_Master walkboxes_master;
 
@@ -62,6 +63,156 @@ namespace UnityTelltaleTools
                     GenerateUnityWBOX();
                 }
             }
+            else if (tabIndex == 2)
+            {
+                //section title
+                GUILayout.Label("[Convert .wbox to .obj]", EditorStyles.boldLabel);
+                GUILayout.Space(guiSectionSpacePixels);
+
+                if (GUILayout.Button("Convert Walkbox To OBJ"))
+                {
+                    ImportWBOX_ToOBJ();
+                }
+            }
+        }
+
+        public void ImportWBOX_ToOBJ()
+        {
+            string filePath = EditorUtility.OpenFilePanel("Import Walkbox To Convert To Obj", "", "wbox");
+
+            walkboxes_master = new WalkBoxes_Master(filePath);
+            Walkboxes walkboxes = walkboxes_master.walkboxes;
+
+            //-----------------------------------------
+            //mVerts
+
+            List<UnityEngine.Vector3> meshVerticies = new List<UnityEngine.Vector3>();
+
+            for (int i = 0; i < walkboxes.mVerts.Length; i++)
+            {
+                Vert mVert = walkboxes.mVerts[i];
+
+                UnityEngine.Vector3 unityVertexPosition = new UnityEngine.Vector3()
+                {
+                    x = mVert.mPos.x,
+                    y = mVert.mPos.y,
+                    z = mVert.mPos.z
+                };
+
+                meshVerticies.Add(unityVertexPosition);
+            }
+
+            //-----------------------------------------
+            //mNormals
+
+            List<UnityEngine.Vector3> meshNormals = new List<UnityEngine.Vector3>();
+
+            for (int i = 0; i < walkboxes.mNormals.Length; i++)
+            {
+                Vector3 mNormal = walkboxes.mNormals[i];
+
+                UnityEngine.Vector3 unity_normal = new UnityEngine.Vector3()
+                {
+                    x = mNormal.x,
+                    y = mNormal.y,
+                    z = mNormal.z
+                };
+
+                meshNormals.Add(unity_normal);
+            }
+
+            //-----------------------------------------
+            //mQuads
+            for (int i = 0; i < walkboxes.mQuads.Length; i++)
+            {
+                Quad mQuad = walkboxes.mQuads[i];
+            }
+
+            //-----------------------------------------
+            //mTris
+
+            List<int> meshTriangles = new List<int>();
+
+            for (int i = 0; i < walkboxes.mTris.Length; i++)
+            {
+                Tri mTri = walkboxes.mTris[i];
+
+                for (int x = 0; x < mTri.mEdgeInfo.Length; x++) //SArray<WalkBoxes::Edge,3>
+                {
+                    //-----------------------------------------
+                    //mEdgeInfo
+                    Edge mEdge = mTri.mEdgeInfo[x];
+                }
+
+                meshTriangles.Add(mTri.mVerts[0]);
+                meshTriangles.Add(mTri.mVerts[1]);
+                meshTriangles.Add(mTri.mVerts[2]);
+            }
+
+            Mesh mesh = new Mesh();
+            mesh.name = walkboxes.mName;
+            mesh.vertices = meshVerticies.ToArray();
+            mesh.triangles = meshTriangles.ToArray();
+            mesh.normals = meshNormals.ToArray();
+
+            mesh.RecalculateNormals();
+            mesh.RecalculateTangents();
+            mesh.OptimizeIndexBuffers();
+            mesh.OptimizeReorderVertexBuffer();
+            mesh.Optimize();
+
+            string finalPath = Application.dataPath + "/" + walkboxes.mName + ".obj";
+
+            using (StreamWriter sw = new StreamWriter(finalPath))
+            {
+                sw.Write(MeshToString(mesh));
+            }
+
+            AssetDatabase.Refresh();
+
+            EditorUtility.RevealInFinder(finalPath);
+        }
+
+        private static string MeshToString(Mesh mesh)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append("g ").Append(mesh.name).Append("\n");
+
+            foreach (UnityEngine.Vector3 v in mesh.vertices)
+            {
+                sb.Append(string.Format("v {0} {1} {2}\n", v.x, v.y, v.z));
+            }
+
+            sb.Append("\n");
+
+            foreach (UnityEngine.Vector3 v in mesh.normals)
+            {
+                sb.Append(string.Format("vn {0} {1} {2}\n", v.x, v.y, v.z));
+            }
+
+            sb.Append("\n");
+
+            foreach (UnityEngine.Vector3 v in mesh.uv)
+            {
+                sb.Append(string.Format("vt {0} {1}\n", v.x, v.y));
+            }
+
+            for (int material = 0; material < mesh.subMeshCount; material++)
+            {
+                sb.Append("\n");
+                //sb.Append("usemtl ").Append(mats[material].name).Append("\n");
+                //sb.Append("usemap ").Append(mats[material].name).Append("\n");
+
+                int[] triangles = mesh.GetTriangles(material);
+
+                for (int i = 0; i < triangles.Length; i += 3)
+                {
+                    sb.Append(string.Format("f {0}/{0}/{0} {1}/{1}/{1} {2}/{2}/{2}\n", triangles[i] + 1, triangles[i + 1] + 1, triangles[i + 2] + 1));
+                }
+            }
+
+            return sb.ToString();
         }
 
         private void ImportUnityWBOX()
@@ -342,8 +493,6 @@ namespace UnityTelltaleTools
 
             int edgeIndex = 0;
 
-            //int newTriangleCount = triangledNavMesh.indices.Length * 3;
-            //for (int i = 0; i < triangledNavMesh.indices.Length; i++)
             for (int i = 0; i < triangledNavMesh.indices.Length; i += 3)
             {
                 GameObject wbox_tri_gameObject = new GameObject(string.Format("mTri {0}", i));
@@ -390,15 +539,10 @@ namespace UnityTelltaleTools
                     GameObject wbox_edge_gameObject = new GameObject(string.Format("mEdge {0}", x));
                     ProxyEdge proxy_mEdge = wbox_edge_gameObject.AddComponent<ProxyEdge>();
 
-                    int mV1_vertexIndex = 0;
-                    int mV2_vertexIndex = 0;
+                    int mV1_vertexIndex = vertexIndex1;
+                    int mV2_vertexIndex = vertexIndex2;
 
-                    if(x == 0)
-                    {
-                        mV1_vertexIndex = vertexIndex1;
-                        mV2_vertexIndex = vertexIndex2;
-                    }
-                    else if(x == 1)
+                    if(x == 1)
                     {
                         mV1_vertexIndex = vertexIndex2;
                         mV2_vertexIndex = vertexIndex3;

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using System.Collections;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -29,6 +31,9 @@ public class ProxyWalkboxes : MonoBehaviour
     public void ExportWalkbox()
     {
         var path = EditorUtility.SaveFilePanel("Export WBOX", "", mName, "wbox");
+
+        if (path == null)
+            return;
 
         using (BinaryWriter writer = new BinaryWriter(File.OpenWrite(path)))
         {
