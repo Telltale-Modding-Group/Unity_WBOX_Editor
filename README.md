@@ -1,1 +1,1 @@
-# Unity_WBOX_Editor
+# Telltale WalkBox (.wbox) Unity Editor
